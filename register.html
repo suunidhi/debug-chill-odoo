@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - StackIt</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Register - StackIt Q&A Forum</h1>
+
+    <p id="message" style="font-weight: bold;"></p>
+
+    <form id="registerForm">
+        <input type="text" id="username" name="username" placeholder="Username" required><br>
+        <input type="email" id="email" name="email" placeholder="Email" required><br>
+        <input type="password" id="password" name="password" placeholder="Password" required><br>
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+
+    <script>
+        const form = document.getElementById("registerForm");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const userData = {
+                username: document.getElementById("username").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                password: document.getElementById("password").value.trim()
+            };
+
+            fetch("http://127.0.0.1:5000/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                message.innerText = data.message || "Unknown error.";
+                message.style.color = data.success ? "green" : "red";
+
+                if (data.success) {
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                message.innerText = "❌ Something went wrong.";
+                message.style.color = "red";
+            });
+        });
+    </script>
+</body>
+</html>

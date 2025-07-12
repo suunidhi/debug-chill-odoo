@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Question - StackIt</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>View Question</h1>
+
+    <div id="questionContainer"></div>
+
+    <h2>Post Your Answer</h2>
+    <p id="answerMsg" style="font-weight: bold;"></p>
+    <form id="answerForm">
+        <textarea id="answerText" placeholder="Type your answer here..." required></textarea><br>
+        <button type="submit">Submit Answer</button>
+    </form>
+
+    <h3>Answers</h3>
+    <div id="answersContainer"></div>
+
+    <p><a href="index.html">⬅ Back to Home</a></p>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const questionId = params.get("id");
+        const questionContainer = document.getElementById("questionContainer");
+        const answersContainer = document.getElementById("answersContainer");
+        const answerForm = document.getElementById("answerForm");
+        const answerMsg = document.getElementById("answerMsg");
+
+        // Fetch and display the question
+        fetch(`http://127.0.0.1:5000/api/questions/${questionId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    questionContainer.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                } else {
+                    const q = data.question;
+                    questionContainer.innerHTML = `
+                        <h2>${q.title}</h2>
+                        <p>${q.description}</p>
+                        <small>Posted on ${q.created_at}</small>
+                    `;
+
+                    // Show answers
+                    answersContainer.innerHTML = data.answers.map(ans => `
+                        <div class="answer">
+                            <p>${ans.text}</p>
+                            <small>Answered on ${ans.created_at}</small>
+                        </div>
+                    `).join('');
+                }
+            });
+
+        // Submit new answer
+        answerForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const answerText = document.getElementById("answerText").value;
+
+            fetch(`http://127.0.0.1:5000/api/questions/${questionId}/answer`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({ text: answerText })
+            })
+            .then(res => res.json())
+            .then(data => {
+                answerMsg.innerText = data.message;
+                answerMsg.style.color = data.message.includes("success") ? "green" : "red";
+                if (data.message.includes("success")) {
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(err => {
+                answerMsg.innerText = "❌ Failed to post answer.";
+                answerMsg.style.color = "red";
+            });
+        });
+    </script>
+</body>
+</html>
