@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logout - StackIt</title>
+</head>
+<body>
+    <h2>Logging out...</h2>
+
+    <script>
+        fetch("http://127.0.0.1:5000/api/auth/logout", {
+            method: "POST",
+            credentials: "include"  // only if using cookies
+        })
+        .finally(() => {
+            // After clearing session or token, redirect
+            window.location.href = "login.html";
+        });
+    </script>
+</body>
+</html>
